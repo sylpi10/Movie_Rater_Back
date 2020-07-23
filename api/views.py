@@ -3,16 +3,24 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.models import Movie, Rating
-from api.serializers import MovieSerializer, RatingSerializer
+from api.serializers import MovieSerializer, RatingSerializer, UserSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    # authentication_classes = (TokenAuthentication, )
 
 
 class MovieViewSet(viewsets.ModelViewSet):
     queryset = Movie.objects.all()
     serializer_class = MovieSerializer
     authentication_classes = (TokenAuthentication, )
+    permission_classes = (IsAuthenticated, )
 
     @action(detail=True, methods=['POST'])
     def rate_movie(self, request, pk=None):
@@ -49,3 +57,12 @@ class RatingViewSet(viewsets.ModelViewSet):
     queryset = Rating.objects.all()
     serializer_class = RatingSerializer
     authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def update(self, request, *args, **kwargs):
+        response = {'message': 'you can\'t update ratings like that'}
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+
+    def create(self, request, *args, **kwargs):
+        response = {'message': 'you can\'t create ratings like that'}
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
